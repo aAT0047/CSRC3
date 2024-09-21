@@ -1,0 +1,103 @@
+import pandas as pd
+import numpy as np 
+import csv
+# from sklearn import check_array
+import warnings
+from functools import partial
+import math
+import numpy as np
+import numpy as np
+
+def rank(predict, target):
+    predict = np.array(predict)
+    target = np.array(target)
+    if(np.shape(predict) != np.shape(target)):
+        return
+    dimData,numLabel = np.shape(predict)
+
+    seq = getSeq(predict)
+    rank = getRank(seq)
+    # print(pd.DataFrame(seq)) 
+    # print(pd.DataFrame(rank)) 
+    rankingloss= 0
+    residual = 0
+    vec = np.empty(dimData)
+    res = np.empty((dimData,numLabel))
+    for i in range(dimData):
+        dim_yi = np.sum(np.rint(predict[i]))
+        dim_ti = np.sum(np.rint(target[i]))
+        residual = 0
+        # test_rankingloss = rankingloss
+        if(dim_ti!=0 and dim_ti!=numLabel):
+            cnt_rank = 0
+            
+            for j in range(numLabel):
+                if(target[i][j]==0):
+                    continue
+                for k in range(numLabel):
+                    if(target[i][k]==1):
+                        continue
+                    if(rank[i][j] > rank[i][k]):
+                        cnt_rank += 1
+                        # residual += abs(predict[i][k]-predict[i][j])/predict[i][j]
+                        res[i][k] = (predict[i][k]-predict[i][j])**2/predict[i][k]
+                        residual += ((predict[i][k]-predict[i][j])**2/predict[i][k])
+                        # residual += ((predict[i][j]-predict[i][k])/math.sqrt((1-predict[i][k])*(predict[i][k])))
+                    else:
+                        res[i][k]=0
+            rankingloss += cnt_rank/(dim_ti*(numLabel-dim_ti))
+            vec[i] = residual
+        else:
+            vec[i] =0
+         
+        
+        # print(rankingloss- test_rankingloss)
+
+       
+    rankingloss /= dimData
+
+    return rankingloss,vec,res
+
+def getSeq(y):
+    seq = []
+    for i in range(np.shape(y)[0]):
+        seq.append(arraysort(y[i]))
+    return np.array(seq)
+
+def getRank(seq):
+    rank = np.zeros(np.shape(seq))
+    for i in range(np.shape(seq)[0]):
+        for j in range(np.shape(seq)[1]):
+            indexb = int(seq[i][j])
+            rank[i][indexb] = j+1
+    return rank
+
+def arraysort(org_arr):
+    length = np.shape(org_arr)[0]
+    index = np.zeros(length)
+    arr = np.zeros(length)
+    for i in range(length):
+        index[i] = int(i)
+        arr[i] = org_arr[i]
+    temp = 0
+    thisIndex = 0
+    for i in range(length):
+        for j in range(length-i-1):
+            if(arr[j] < arr[j + 1]):
+                temp = arr[j]
+                arr[j] = arr[j + 1]
+                arr[j + 1] = temp
+
+                thisIndex = index[j]
+                index[j] = index[j + 1]
+                index[j + 1] = thisIndex
+    return index
+
+
+y_true =pd.read_csv(r"C:\Users\1\Desktop\data\yy.csv")
+y_score = pd.read_csv(r"C:\Users\1\Desktop\data\p.csv")
+print(pd.DataFrame(y_score))
+s,t,rr = rank(y_score,y_true )
+pd.DataFrame(t).to_csv(r"C:\Users\1\Desktop\data\tttt.csv", index=False)
+print('over')
+pd.DataFrame(rr).to_csv(r"C:\Users\1\Desktop\data\rr.csv", index=False)
