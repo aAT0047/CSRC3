@@ -59,4 +59,45 @@ Below is the pseudocode for the **CSRC3** algorithm:
 \caption{CSRC3}
 \end{algorithm}
 
+\documentclass{article}
+\usepackage[linesnumbered,ruled,vlined]{algorithm2e}
+
+\begin{document}
+
+\begin{algorithm}[H]
+\caption{DP\_order}
+\SetAlgoLined
+\KwIn{
+  A set of labels \( \Lambda = \{q_1, q_2, \ldots, q_5\} \),\\
+  A vector \( y = [y_1, y_2, \ldots, y_5] \)
+}
+\KwOut{Optimal value \( Q^*_{\text{opt}} \)}
+
+\textbf{Initialization:}\\
+\For{\(i = 1\) \KwTo \(5\)}{
+  Set \( V(i, 1) = \frac{1}{(y_i)^2} \)
+}
+
+\textbf{Recursive Computation:}\\
+\For{\(n = 2\) \KwTo \(5\)}{
+  \For{\(i = 1\) \KwTo \(5\)}{
+    Set \( V(i, n) = \infty \)\\
+    \For{\(j = 1\) \KwTo \(5\)}{
+      \If{\( j \neq i \) \textbf{and} \( q_i \notin M^{n-1} \)}{
+        Compute cost \( = \frac{1}{(y_i)^{n+1}} + V(j, n - 1) \)\\
+        \If{\( cost < V(i, n) \)}{
+          Set \( V(i, n) = cost \)\\
+          Update \( M^n \)
+        }
+      }
+    }
+  }
+}
+
+\textbf{Solution Extraction:}\\
+Set \( Q^*_{\text{opt}} = \min\limits_{i} V(i, 5) \)
+
+\end{algorithm}
+
+\end{document}
 
